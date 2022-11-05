@@ -1,0 +1,33 @@
+name: ci
+
+on:
+  push:
+
+  schedule:
+    - cron: "0 0 * * *"
+
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: git submodule update --init --recursive
+      - uses: goto-bus-stop/setup-zig@v1
+        with:
+          version: master
+      - run: zig fmt --check *.zig src/*.zig
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: git submodule update --init --recursive
+      - uses: goto-bus-stop/setup-zig@v1
+        with:
+          version: master
+      - run: zig build
